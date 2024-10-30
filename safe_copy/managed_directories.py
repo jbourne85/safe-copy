@@ -13,11 +13,11 @@ class FileStats:
         self._checksum = None
 
     @property
-    def checksum_method(self):
+    def checksum_method(self) -> str:
         return "md5"
 
     @property
-    def checksum(self):
+    def checksum(self) -> str:
         if self._checksum is None:
             md5_hash = hashlib.md5()
             with open(self.path , "rb") as f:
