@@ -1,5 +1,5 @@
 import hashlib
-
+import pathlib
 
 class FileStats:
     """
@@ -8,7 +8,7 @@ class FileStats:
 
     :param filepath: This is the absolute path to the file to represent
     """
-    def __init__(self, filepath):
+    def __init__(self, filepath: pathlib.Path):
         self.path = filepath
         self._checksum = None
 
