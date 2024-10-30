@@ -8,4 +8,4 @@ description = "Small util for copying files between directories in a manner wher
 readme = "README.md"
 requires-pythom = ">=3.9"
 [project.scripts]
-safe-copy = "safe_copy:main"
+safe-copy = "safe_copy.safe_copy:main"
