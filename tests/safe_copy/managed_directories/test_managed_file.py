@@ -1,6 +1,7 @@
-from safe_copy.managed_directory import FileStats
+from safe_copy.managed_directory import (FileStats, ManagedDirectory)
+import pathlib
 import tempfile
-
+from unittest import mock
 
 def test_file_stats():
     # Due to the checksum of the file being important, perform a more indepth test that creates a file of a known
@@ -29,3 +30,20 @@ def test_file_stats():
     assert sut._checksum is None
     assert sut.checksum == '94a3d4bf17e438258768d3b708e606f1'
     assert sut._checksum == '94a3d4bf17e438258768d3b708e606f1'
+
+
+@mock.patch('safe_copy.managed_directory.FileStats', autospec=True)
+def test_managed_directory_constructor(mock_filestats):
+    with mock.patch('os.walk') as mock_directory_contents:
+        mock_directory_contents.return_value = [
+            ('/root_dir/sub_dir1/', ('sub_dir2',), ('filename1',)),
+            ('/root_dir/sub_dir1/sub_dir2', (), ('filename2', 'filename3')),
+        ]
+        sut = ManagedDirectory('/root_dir/sub_dir1/')
+
+        assert len(sut.directory_stats) == 3
+        mock_filestats.assert_has_calls([
+            mock.call(pathlib.PosixPath('/root_dir/sub_dir1/filename1')),
+            mock.call(pathlib.PosixPath('/root_dir/sub_dir1/sub_dir2/filename2')),
+            mock.call(pathlib.PosixPath('/root_dir/sub_dir1/sub_dir2/filename3'))
+        ])

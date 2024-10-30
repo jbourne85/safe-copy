@@ -1,5 +1,7 @@
 import hashlib
+import os
 import pathlib
+
 
 class FileStats:
     """
@@ -26,3 +28,21 @@ class FileStats:
                     md5_hash.update(byte_block)
             self._checksum = md5_hash.hexdigest()
         return self._checksum
+
+class ManagedDirectory:
+    """
+    This represents a managed directory and knows what its contents are, and the stats of those files
+
+    param: managed_directory_root: This is the absolute root path of the directory to be managed
+    """
+    def __init__(self, managed_directory_root: pathlib.Path):
+        self._root_dir = managed_directory_root
+        self.directory_stats = self._get_directory_stats()
+
+    def _get_directory_stats(self) -> list:
+        managed_files = []
+        for r, d, f in os.walk(self._root_dir):
+            for file in f:
+                abs_path = pathlib.Path(os.path.join(r, file))
+                managed_files.append(FileStats(abs_path))
+        return managed_files
