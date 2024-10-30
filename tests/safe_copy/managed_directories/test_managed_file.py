@@ -1,4 +1,4 @@
-from safe_copy.managed_directories import FileStats
+from safe_copy.managed_directory import FileStats
 import tempfile
 
 
