@@ -21,6 +21,7 @@ def safe_copy(source, destination):
     result = managed_destination.compare(managed_source)
     if result == 0:
         print("SUCCESS: All files computed checksums matched")
+        managed_destination.save_checksums()
     else:
         print(f"WARNING: {result} computed checksums did not match")
     return result
