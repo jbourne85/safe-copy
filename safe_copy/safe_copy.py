@@ -6,7 +6,7 @@ import pathlib
 import shutil
 
 
-def safe_copy(source, destination):
+def safe_copy(source: pathlib.Path, destination: pathlib.Path) -> int:
     assert source.is_dir()
     assert destination.is_dir()
 
@@ -30,9 +30,9 @@ def safe_copy(source, destination):
 def main():
     parser = argparse.ArgumentParser(description="Tool to safely copy files from one folder to another, validating "
                                                  "the operation and saving checksums for later validation")
-    parser.add_argument("source", help="The source directory to copy from")
-    parser.add_argument("destination", help="The destination to copy into")
+    parser.add_argument("source", help="The source directory to copy from", type=pathlib.Path)
+    parser.add_argument("destination", help="The destination to copy into", type=pathlib.Path)
 
     args = parser.parse_args()
 
-    sys.exit(safe_copy(pathlib.Path(args.source), pathlib.Path(args.destination)))
+    sys.exit(safe_copy(args.source, args.destination))
