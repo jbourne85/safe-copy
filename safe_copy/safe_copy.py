@@ -14,11 +14,11 @@ def safe_copy(source: pathlib.Path, destination: pathlib.Path) -> int:
     print(f"Copying {source} -> {destination}")
 
     managed_source = ManagedDirectory(source.absolute())
-    managed_destination = ManagedDirectory(destination.absolute())
-
     shutil.copytree(source, destination, dirs_exist_ok=True)
 
+    managed_destination = ManagedDirectory(destination.absolute())
     result = managed_destination.compare(managed_source)
+
     if result == 0:
         print("SUCCESS: All files computed checksums matched")
         managed_destination.save_checksums()
