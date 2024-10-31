@@ -30,8 +30,8 @@ def safe_copy(source, destination):
 def main():
     parser = argparse.ArgumentParser(description="Tool to safely copy files from one folder to another, validating "
                                                  "the operation and saving checksums for later validation")
-    parser.add_argument("--source", required=True, help="The source directory to copy from")
-    parser.add_argument("--destination", required=True, help="The destination to copy into")
+    parser.add_argument("source", help="The source directory to copy from")
+    parser.add_argument("destination", help="The destination to copy into")
 
     args = parser.parse_args()
 

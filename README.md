@@ -11,7 +11,7 @@ The main utility is the `safe-copy` util itself, which takes s source and destin
 then verifies that the destination files are valid (as determined via their checksums)
 
 Example:<br/><br/>
-`safe-copy --source /media/data --destination /mnt/backup`<br/>
+`safe-copy /media/data /mnt/backup`<br/>
 <br/>
 This will copy the contents `/media/data` into `/mnt/backup` (with the directory  `/mnt/backup/data` being created), 
 after validating all files at the destination are the same it will write the checksums to `/mnt/backup/data/sum.txt`
@@ -21,7 +21,7 @@ This is the companion utility to `safe-copy`, `safe-validate` will look at a dir
 and validate its contents against the `sum.txt` on disk.
 
 Example:<br/><br/>
-`safe-validate --directory /mnt/backup/data`
+`safe-validate /mnt/backup/data`
 <br/>
 This will compare the checksums stored in `/mnt/backup/data/sum.txt` against the contents of `/mnt/backup/data/`. 
 
