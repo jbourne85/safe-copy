@@ -71,3 +71,25 @@ class ManagedDirectory:
             for file in self.directory_stats:
                 if self._checksum_file not in file.path:
                     checksums_file.write(f"{file.checksum}\t{self.relative_path(file)}\n")
+
+    def validate_checksums(self):
+        checksum_path = os.path.join(self._root_dir, self._checksum_file)
+        n_failures = 0
+        if os.path.exists(checksum_path):
+            print(f"Checking checksum from {checksum_path}")
+            with open(checksum_path, 'r') as checksums_file:
+                checksums = checksums_file.readlines()
+                for checksum in checksums:
+                    md5_checksum = checksum.split('\t')[0].strip()
+                    path = pathlib.Path(os.path.join(self._root_dir, checksum.split('\t')[1].strip()))
+
+                    for file in self.directory_stats:
+                        if file.path == path:
+                            if file.checksum == md5_checksum:
+                                print(f"OK:     {file.path}")
+                            else:
+                                print(f"FAILED: {file.path}")
+                                n_failures += 1
+                            break
+        return n_failures
+

@@ -102,3 +102,28 @@ def test_write_checksums(mock_checksum_file, directory_files, checksum_files):
 
         write_calls = [mock.call(f"{file.checksum}\t{file.path}\n") for file in checksum_files]
         handle.write.assert_has_calls(write_calls)
+
+
+@pytest.mark.parametrize(
+    ('directory_files', 'checksum_files', 'failure_count'),
+    [
+        ([FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], [FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], 0),
+        ([FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6qa'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], [FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], 1),
+        ([FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6qa'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqa'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], [FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], 2),
+        ([FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6qa'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqa'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1a')], [FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], 3),
+    ],
+    ids=['0 Mismatch', '1 Mismatch', '2 Mismatch', '3 Mismatch']
+)
+@mock.patch('builtins.open', new_callable=mock.mock_open)
+@mock.patch('os.path.exists')
+def test_validate_checksums(mock_dir_exists, mock_checksum_file, directory_files, checksum_files, failure_count):
+    with mock.patch.object(ManagedDirectory, '_get_directory_stats') as mock_directory_stats:
+        mock_directory_stats.return_value = directory_files
+        sut = ManagedDirectory('/tmp/')
+
+        checksum_lines = [f"{file.checksum}\t{file.path}\n" for file in checksum_files]
+
+        handle = mock_checksum_file()
+        handle.readlines.return_value = checksum_lines
+        mock_dir_exists.return_code = True
+        assert failure_count == sut.validate_checksums()
