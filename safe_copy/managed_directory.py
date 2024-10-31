@@ -1,3 +1,4 @@
+from __future__ import annotations
 import hashlib
 import os
 import pathlib
@@ -49,10 +50,10 @@ class ManagedDirectory:
                 managed_files.append(FileStats(abs_path))
         return managed_files
 
-    def relative_path(self, file):
+    def relative_path(self, file: pathlib.Path):
         return file.path.relative_to(self._root_dir)
 
-    def compare(self, other):
+    def compare(self, other: ManagedDirectory) -> int:
         n_failures = 0
         for other_file in other.directory_stats:
             for file in self.directory_stats:
