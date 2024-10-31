@@ -69,7 +69,7 @@ class ManagedDirectory:
     def save_checksums(self):
         with open(os.path.join(self._root_dir, self._checksum_file), 'w') as checksums_file:
             for file in self.directory_stats:
-                if self._checksum_file not in file.path:
+                if self._checksum_file not in file.path.parts:
                     checksums_file.write(f"{file.checksum}\t{self.relative_path(file)}\n")
 
     def validate_checksums(self):

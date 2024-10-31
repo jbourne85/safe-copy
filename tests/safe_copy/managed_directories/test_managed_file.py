@@ -5,6 +5,20 @@ import pytest
 import tempfile
 from unittest import mock
 
+
+FileStatsTest = namedtuple(
+    "FileStatsTest",
+    (
+        'path',
+        'checksum'
+    )
+)
+
+
+def mock_file_stat(filename, checksum):
+    return FileStatsTest(pathlib.Path(filename), checksum)
+
+
 def test_file_stats():
     # Due to the checksum of the file being important, perform a more indepth test that creates a file of a known
     # content. Rather than mocking the hashing lib
@@ -50,21 +64,13 @@ def test_managed_directory_constructor(mock_filestats):
             mock.call(pathlib.PosixPath('/root_dir/sub_dir1/sub_dir2/filename3'))
         ])
 
-
-FileStatsTest = namedtuple(
-    "FileStatsTest",
-    (
-        'path',
-        'checksum'
-    )
-)
 @pytest.mark.parametrize(
     ('src_files', 'dst_files', 'failure_count'),
     [
-        ([FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], 0),
-        ([FileStatsTest('/tmp/filename1', 'x6qa'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], 1),
-        ([FileStatsTest('/tmp/filename1', 'x6qa'), FileStatsTest('/tmp/filename2', 'fxqa'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], 2),
-        ([FileStatsTest('/tmp/filename1', 'x6qa'), FileStatsTest('/tmp/filename2', 'fxqa'), FileStatsTest('/tmp/filename3', 'yu1a')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], 3),
+        ([mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], 0),
+        ([mock_file_stat('/tmp/filename1', 'x6qa'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], 1),
+        ([mock_file_stat('/tmp/filename1', 'x6qa'), mock_file_stat('/tmp/filename2', 'fxqa'), mock_file_stat('/tmp/filename3', 'yu1k')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], 2),
+        ([mock_file_stat('/tmp/filename1', 'x6qa'), mock_file_stat('/tmp/filename2', 'fxqa'), mock_file_stat('/tmp/filename3', 'yu1a')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], 3),
     ],
     ids=['0 Mismatch', '1 Mismatch', '2 Mismatch', '3 Mismatch']
 )
@@ -84,8 +90,8 @@ def test_managed_directory_compare(src_files, dst_files, failure_count):
 @pytest.mark.parametrize(
     ('directory_files', 'checksum_files'),
     [
-        ([FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')]),
-        ([FileStatsTest('/tmp/sum.txt',   'y5q0'), FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')]),
+        ([mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')]),
+        ([mock_file_stat('/tmp/sum.txt',   'y5q0'), mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')]),
     ],
     ids=['All Files', 'Exclude sum.txt']
 )
@@ -107,10 +113,10 @@ def test_write_checksums(mock_checksum_file, directory_files, checksum_files):
 @pytest.mark.parametrize(
     ('directory_files', 'checksum_files', 'failure_count'),
     [
-        ([FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], [FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], 0),
-        ([FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6qa'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], [FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], 1),
-        ([FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6qa'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqa'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], [FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], 2),
-        ([FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6qa'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqa'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1a')], [FileStatsTest(pathlib.PosixPath('/tmp/filename1'), 'x6q0'), FileStatsTest(pathlib.PosixPath('/tmp/filename2'), 'fxqb'), FileStatsTest(pathlib.PosixPath('/tmp/filename3'), 'yu1k')], 3),
+        ([mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], 0),
+        ([mock_file_stat('/tmp/filename1', 'x6qa'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], 1),
+        ([mock_file_stat('/tmp/filename1', 'x6qa'), mock_file_stat('/tmp/filename2', 'fxqa'), mock_file_stat('/tmp/filename3', 'yu1k')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], 2),
+        ([mock_file_stat('/tmp/filename1', 'x6qa'), mock_file_stat('/tmp/filename2', 'fxqa'), mock_file_stat('/tmp/filename3', 'yu1a')], [mock_file_stat('/tmp/filename1', 'x6q0'), mock_file_stat('/tmp/filename2', 'fxqb'), mock_file_stat('/tmp/filename3', 'yu1k')], 3),
     ],
     ids=['0 Mismatch', '1 Mismatch', '2 Mismatch', '3 Mismatch']
 )
