@@ -1,5 +1,6 @@
 import argparse
 import pathlib
+from safe_copy.managed_directory import ManagedDirectory
 import sys
 
 
@@ -8,7 +9,13 @@ def safe_validate(directory):
 
     print(f"Validating {directory}")
 
-    return 0
+    test_directory = ManagedDirectory(directory)
+    result = test_directory.validate_checksums()
+    if result == 0:
+        print("SUCCESS: All files on disk match saved matched")
+    else:
+        print(f"WARNING: {result} computed checksums did not match")
+    return result
 
 
 def main():
