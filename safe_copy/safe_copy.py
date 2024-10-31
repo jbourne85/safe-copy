@@ -28,7 +28,8 @@ def safe_copy(source, destination):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Tool to train the parameters of the cryptodec")
+    parser = argparse.ArgumentParser(description="Tool to safely copy fioles from one folder to anouther, validating "
+                                                 "the operation and saving checksums for later validation")
     parser.add_argument("--source", required=True, help="The source directory to copy from")
     parser.add_argument("--destination", required=True, help="The destination to copy into")
 
