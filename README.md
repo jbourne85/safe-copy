@@ -21,7 +21,7 @@ This is the companion utility to `safe-copy`, `safe-validate` will look at a dir
 and validate its contents against the `sum.txt` on disk.
 
 Example:<br/><br/>
-`safe-validate /mnt/backup/data`
+`safe-validate /mnt/backup/data`<br/>
 <br/>
 This will compare the checksums stored in `/mnt/backup/data/sum.txt` against the contents of `/mnt/backup/data/`. 
 
