@@ -1,5 +1,7 @@
 from safe_copy.managed_directory import (FileStats, ManagedDirectory)
+from collections import namedtuple
 import pathlib
+import pytest
 import tempfile
 from unittest import mock
 
@@ -47,3 +49,33 @@ def test_managed_directory_constructor(mock_filestats):
             mock.call(pathlib.PosixPath('/root_dir/sub_dir1/sub_dir2/filename2')),
             mock.call(pathlib.PosixPath('/root_dir/sub_dir1/sub_dir2/filename3'))
         ])
+
+
+FileStatsTest = namedtuple(
+    "FileStatsTest",
+    (
+        'path',
+        'checksum'
+    )
+)
+@pytest.mark.parametrize(
+    ('src_files', 'dst_files', 'failure_count'),
+    [
+        ([FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], 0),
+        ([FileStatsTest('/tmp/filename1', 'x6qa'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], 1),
+        ([FileStatsTest('/tmp/filename1', 'x6qa'), FileStatsTest('/tmp/filename2', 'fxqa'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], 2),
+        ([FileStatsTest('/tmp/filename1', 'x6qa'), FileStatsTest('/tmp/filename2', 'fxqa'), FileStatsTest('/tmp/filename3', 'yu1a')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], 3),
+    ],
+    ids=['0 Mismatch', '1 Mismatch', '2 Mismatch', '3 Mismatch']
+)
+def test_managed_directory_compare(src_files, dst_files, failure_count):
+    with mock.patch.object(ManagedDirectory, '_get_directory_stats') as mock_directory_stats:
+        mock_directory_stats.return_value = src_files
+        source_mock = ManagedDirectory('/tmp/')
+
+        mock_directory_stats.return_value = dst_files
+        destination_mock = ManagedDirectory('/tmp/')
+
+    with mock.patch.object(ManagedDirectory, 'relative_path') as mock_relative_path:
+        mock_relative_path.side_effect = lambda file: file.path
+        assert failure_count == destination_mock.compare(source_mock)

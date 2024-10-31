@@ -38,6 +38,7 @@ class ManagedDirectory:
     def __init__(self, managed_directory_root: pathlib.Path):
         self._root_dir = managed_directory_root
         self.directory_stats = self._get_directory_stats()
+        self._checksum_file = 'sum.txt'
 
     def _get_directory_stats(self) -> list:
         managed_files = []
@@ -46,3 +47,19 @@ class ManagedDirectory:
                 abs_path = pathlib.Path(os.path.join(r, file))
                 managed_files.append(FileStats(abs_path))
         return managed_files
+
+    def relative_path(self, file):
+        return file.path.relative_to(self._root_dir)
+
+    def compare(self, other):
+        n_failures = 0
+        for other_file in other.directory_stats:
+            for file in self.directory_stats:
+                if self.relative_path(file) == other.relative_path(other_file):
+                    if file.checksum == other_file.checksum:
+                        print(f"OK:     {file.path}")
+                    else:
+                        print(f"FAILED: {file.path}")
+                        n_failures += 1
+                    break
+        return n_failures
