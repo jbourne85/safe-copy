@@ -9,3 +9,4 @@ readme = "README.md"
 requires-pythom = ">=3.9"
 [project.scripts]
 safe-copy = "safe_copy.safe_copy:main"
+safe-validate = "safe_copy.safe_validate:main"
