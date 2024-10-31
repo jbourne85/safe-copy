@@ -29,6 +29,7 @@ class FileStats:
             self._checksum = md5_hash.hexdigest()
         return self._checksum
 
+
 class ManagedDirectory:
     """
     This represents a managed directory and knows what its contents are, and the stats of those files
@@ -63,3 +64,9 @@ class ManagedDirectory:
                         n_failures += 1
                     break
         return n_failures
+
+    def save_checksums(self):
+        with open(os.path.join(self._root_dir, self._checksum_file), 'w') as checksums_file:
+            for file in self.directory_stats:
+                if self._checksum_file not in file.path:
+                    checksums_file.write(f"{file.checksum}\t{self.relative_path(file)}\n")

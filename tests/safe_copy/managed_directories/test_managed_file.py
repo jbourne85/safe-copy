@@ -79,3 +79,26 @@ def test_managed_directory_compare(src_files, dst_files, failure_count):
     with mock.patch.object(ManagedDirectory, 'relative_path') as mock_relative_path:
         mock_relative_path.side_effect = lambda file: file.path
         assert failure_count == destination_mock.compare(source_mock)
+
+
+@pytest.mark.parametrize(
+    ('directory_files', 'checksum_files'),
+    [
+        ([FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')]),
+        ([FileStatsTest('/tmp/sum.txt',   'y5q0'), FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')], [FileStatsTest('/tmp/filename1', 'x6q0'), FileStatsTest('/tmp/filename2', 'fxqb'), FileStatsTest('/tmp/filename3', 'yu1k')]),
+    ],
+    ids=['All Files', 'Exclude sum.txt']
+)
+@mock.patch('builtins.open', new_callable=mock.mock_open)
+def test_write_checksums(mock_checksum_file, directory_files, checksum_files):
+    with mock.patch.object(ManagedDirectory, '_get_directory_stats') as mock_directory_stats:
+        mock_directory_stats.return_value = directory_files
+        sut = ManagedDirectory('/tmp/')
+
+    with mock.patch.object(ManagedDirectory, 'relative_path') as mock_relative_path:
+        mock_relative_path.side_effect = lambda file: file.path
+        sut.save_checksums()
+        handle = mock_checksum_file()
+
+        write_calls = [mock.call(f"{file.checksum}\t{file.path}\n") for file in checksum_files]
+        handle.write.assert_has_calls(write_calls)
