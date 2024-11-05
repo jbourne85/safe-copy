@@ -103,12 +103,15 @@ def test_write_checksums(mock_checksum_file, directory_files, checksum_files):
 
     with mock.patch.object(ManagedDirectory, 'relative_path') as mock_relative_path:
         mock_relative_path.side_effect = lambda file: file.path
-        sut.save_checksums()
-        handle = mock_checksum_file()
 
+        sut.save_checksums()
+
+        assert len(mock_checksum_file.call_args_list) == 1
+        assert mock_checksum_file.call_args_list[0] == mock.call(pathlib.PosixPath('/tmp/sum.txt'), 'w')
+
+        handle = mock_checksum_file()
         write_calls = [mock.call(f"{file.checksum}\t{file.path}\n") for file in checksum_files]
         handle.write.assert_has_calls(write_calls)
-
 
 @pytest.mark.parametrize(
     ('directory_files', 'checksum_files', 'failure_count'),
@@ -120,16 +123,17 @@ def test_write_checksums(mock_checksum_file, directory_files, checksum_files):
     ],
     ids=['0 Mismatch', '1 Mismatch', '2 Mismatch', '3 Mismatch']
 )
-@mock.patch('builtins.open', new_callable=mock.mock_open)
 @mock.patch('os.path.exists')
-def test_validate_checksums(mock_dir_exists, mock_checksum_file, directory_files, checksum_files, failure_count):
+def test_validate_checksums(mock_dir_exists, directory_files, checksum_files, failure_count):
     with mock.patch.object(ManagedDirectory, '_get_directory_stats') as mock_directory_stats:
         mock_directory_stats.return_value = directory_files
         sut = ManagedDirectory('/tmp/')
 
-        checksum_lines = [f"{file.checksum}\t{file.path}\n" for file in checksum_files]
+    checksum_lines = [f"{file.checksum}\t{file.path}\n" for file in checksum_files]
+    mock_checksum_file = mock.mock_open(read_data=''.join(checksum_lines))
 
-        handle = mock_checksum_file()
-        handle.readlines.return_value = checksum_lines
-        mock_dir_exists.return_code = True
+    mock_dir_exists.return_code = True
+    with mock.patch("builtins.open", mock_checksum_file):
         assert failure_count == sut.validate_checksums()
+        assert len(mock_checksum_file.call_args_list) == 1
+        assert mock_checksum_file.call_args_list[0] == mock.call(pathlib.PosixPath('/tmp/sum.txt'), 'r')

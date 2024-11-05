@@ -40,13 +40,13 @@ class ManagedDirectory:
     def __init__(self, managed_directory_root: pathlib.Path):
         self._root_dir = managed_directory_root
         self.directory_stats = self._get_directory_stats()
-        self._checksum_file = 'sum.txt'
+        self._checksum_file = pathlib.Path(managed_directory_root, 'sum.txt')
 
     def _get_directory_stats(self) -> list:
         managed_files = []
         for r, d, f in os.walk(self._root_dir):
             for file in f:
-                abs_path = pathlib.Path(os.path.join(r, file))
+                abs_path = pathlib.Path(r, file)
                 managed_files.append(FileStats(abs_path))
         return managed_files
 
@@ -67,21 +67,21 @@ class ManagedDirectory:
         return n_failures
 
     def save_checksums(self):
-        with open(os.path.join(self._root_dir, self._checksum_file), 'w') as checksums_file:
+        with open(self._checksum_file, 'w') as checksums_file:
             for file in self.directory_stats:
                 if self._checksum_file not in file.path.parts:
                     checksums_file.write(f"{file.checksum}\t{self.relative_path(file)}\n")
 
     def validate_checksums(self):
-        checksum_path = os.path.join(self._root_dir, self._checksum_file)
         n_failures = 0
-        if os.path.exists(checksum_path):
-            print(f"Checking checksum from {checksum_path}")
-            with open(checksum_path, 'r') as checksums_file:
+        if os.path.exists(self._checksum_file):
+            print(f"Checking checksum from {self._checksum_file}")
+            with open(self._checksum_file, 'r') as checksums_file:
                 checksums = checksums_file.readlines()
                 for checksum in checksums:
                     md5_checksum = checksum.split('\t')[0].strip()
-                    path = pathlib.Path(os.path.join(self._root_dir, checksum.split('\t')[1].strip()))
+                    rel_path = checksum.split('\t')[1].strip()
+                    path = pathlib.Path(self._root_dir, rel_path)
 
                     for file in self.directory_stats:
                         if file.path == path:
