@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 [project]
 name = "safe-copy"
-version = "1.0.1"
+version = "1.0.2"
 description = "Small util for copying files between directories in a manner where the result is validated"
 readme = "README.md"
 requires-pythom = ">=3.9"
