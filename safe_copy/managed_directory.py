@@ -54,6 +54,7 @@ class ManagedDirectory:
         return file.path.relative_to(self._root_dir)
 
     def compare(self, other: ManagedDirectory) -> int:
+        print(f"Comparing {other._root_dir} to {self._root_dir}")
         n_failures = 0
         for other_file in other.directory_stats:
             for file in self.directory_stats:
@@ -74,22 +75,24 @@ class ManagedDirectory:
 
     def validate_checksums(self):
         n_failures = 0
-        if os.path.exists(self._checksum_file):
-            print(f"Checking checksum from {self._checksum_file}")
-            with open(self._checksum_file, 'r') as checksums_file:
-                checksums = checksums_file.readlines()
-                for checksum in checksums:
-                    md5_checksum = checksum.split('\t')[0].strip()
-                    rel_path = checksum.split('\t')[1].strip()
-                    path = pathlib.Path(self._root_dir, rel_path)
+        if not os.path.exists(self._checksum_file):
+            print(f"Failed to find checksum file {self._checksum_file}")
+            return n_failures
 
-                    for file in self.directory_stats:
-                        if file.path == path:
-                            if file.checksum == md5_checksum:
-                                print(f"OK:     {file.path}")
-                            else:
-                                print(f"FAILED: {file.path}")
-                                n_failures += 1
-                            break
+        print(f"Checking checksum from {self._checksum_file}")
+        with open(self._checksum_file, 'r') as checksums_file:
+            checksums = checksums_file.readlines()
+            for checksum in checksums:
+                md5_checksum = checksum.split('\t')[0].strip()
+                rel_path = checksum.split('\t')[1].strip()
+                path = pathlib.Path(self._root_dir, rel_path)
+
+                for file in self.directory_stats:
+                    if file.path == path:
+                        if file.checksum == md5_checksum:
+                            print(f"OK:     {file.path}")
+                        else:
+                            print(f"FAILED: {file.path}")
+                            n_failures += 1
+                        break
         return n_failures
-
