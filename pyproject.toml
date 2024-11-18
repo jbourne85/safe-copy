@@ -10,3 +10,4 @@ requires-pythom = ">=3.9"
 [project.scripts]
 safe-copy = "safe_copy.safe_copy:main"
 check-dir = "safe_copy.check_dir:main"
+checksum-gen = "safe_copy.checksum_gen:main"

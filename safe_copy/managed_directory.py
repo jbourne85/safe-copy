@@ -98,3 +98,6 @@ class ManagedDirectory:
                             n_failures += 1
                         break
         return n_failures
+
+    def has_checksums(self):
+        return os.path.exists(self._checksum_file)
