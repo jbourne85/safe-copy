@@ -12,7 +12,7 @@ def check_dir(directory: pathlib.Path) -> int:
     test_directory = ManagedDirectory(directory)
     result = test_directory.validate_checksums()
     if result == 0:
-        print("SUCCESS: All files on disk match saved matched")
+        print("SUCCESS: All files on disk match saved checksums")
     else:
         print(f"WARNING: {result} computed checksums did not match")
     return result

@@ -9,7 +9,7 @@ def checksum_gen(directory: pathlib.Path, force: bool) -> int:
 
     managed_source = ManagedDirectory(directory)
     if managed_source.has_checksums() and not force:
-        print("checksums file found, see '--force' flag.")
+        print("checksums file found, see '--force' flag")
         return 1
 
     print(f"Generating checksums for {directory}")
