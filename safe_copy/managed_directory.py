@@ -28,6 +28,7 @@ class FileStats:
                 for byte_block in iter(lambda: f.read(4096), b""):
                     md5_hash.update(byte_block)
             self._checksum = md5_hash.hexdigest()
+            print(f"Calculated checksum {self.checksum_method}={self._checksum} file={self.path}")
         return self._checksum
 
 
@@ -72,6 +73,7 @@ class ManagedDirectory:
             for file in self.directory_stats:
                 if self._checksum_file != file.path:
                     checksums_file.write(f"{file.checksum}\t{self.relative_path(file)}\n")
+            print(f"Saved {len(self.directory_stats)} checksum(s) to {self._checksum_file}")
 
     def validate_checksums(self):
         n_failures = 0
