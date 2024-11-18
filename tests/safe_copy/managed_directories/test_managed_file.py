@@ -112,6 +112,7 @@ def test_write_checksums(mock_checksum_file, directory_files, checksum_files):
         handle = mock_checksum_file()
         write_calls = [mock.call(f"{file.checksum}\t{file.path}\n") for file in checksum_files]
         handle.write.assert_has_calls(write_calls)
+        assert handle.write.call_count == len(write_calls)
 
 @pytest.mark.parametrize(
     ('directory_files', 'checksum_files', 'failure_count'),
