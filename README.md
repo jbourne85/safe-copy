@@ -25,6 +25,15 @@ Example:<br/><br/>
 <br/>
 This will compare the checksums stored in `/mnt/backup/data/sum.txt` against the contents of `/mnt/backup/data/`. 
 
+### checksum-gen
+This will generate a new set of calculated checksums for a given directory.
+
+Example:<br/><br/>
+`checksum-gen /mnt/backup/data`<br/>
+<br/>
+This will calculate the checksums for files stored in `/mnt/backup/data` and save them to `/mnt/backup/data/sum.txt`. If 
+The directory already contains a checksum file this can be overwritten via the use of a `--force` flag.
+
 ## Future Work
 For the moment I'm happy with the functionality of these utilities (as they give me what I need at the moment), however
 if I have more time to spend I would like to add the following:
