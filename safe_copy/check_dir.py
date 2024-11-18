@@ -4,7 +4,7 @@ from safe_copy.managed_directory import ManagedDirectory
 import sys
 
 
-def safe_validate(directory: pathlib.Path) -> int:
+def check_dir(directory: pathlib.Path) -> int:
     assert directory.is_dir()
 
     print(f"Validating {directory}")
@@ -21,8 +21,8 @@ def safe_validate(directory: pathlib.Path) -> int:
 def main():
     parser = argparse.ArgumentParser(description="Tool to validate a directory that has been copied via safe-copy, this"
                                                  "is useful for later data integrity")
-    parser.add_argument("directory", help="The directory to validate", type=pathlib.Path)
+    parser.add_argument("directory", help="The directory to validate, it must contain a sum.txt", type=pathlib.Path)
 
     args = parser.parse_args()
 
-    sys.exit(safe_validate(args.directory))
+    sys.exit(check_dir(args.directory))

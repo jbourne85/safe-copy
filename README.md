@@ -16,12 +16,12 @@ Example:<br/><br/>
 This will copy the contents `/media/data` into `/mnt/backup` (with the directory  `/mnt/backup/data` being created), 
 after validating all files at the destination are the same it will write the checksums to `/mnt/backup/data/sum.txt`
 
-### safe-validate
-This is the companion utility to `safe-copy`, `safe-validate` will look at a directory that has previously been copied
+### check-dir
+This is the companion utility to `safe-copy`, `check-dir` will look at a directory that has previously been copied
 and validate its contents against the `sum.txt` on disk.
 
 Example:<br/><br/>
-`safe-validate /mnt/backup/data`<br/>
+`check-dir /mnt/backup/data`<br/>
 <br/>
 This will compare the checksums stored in `/mnt/backup/data/sum.txt` against the contents of `/mnt/backup/data/`. 
 
