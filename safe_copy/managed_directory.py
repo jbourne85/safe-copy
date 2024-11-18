@@ -81,7 +81,7 @@ class ManagedDirectory:
             print(f"Failed to find checksum file {self._checksum_file}")
             return n_failures
 
-        print(f"Checking checksum from {self._checksum_file}")
+        print(f"Checking checksum(s) from {self._checksum_file}")
         with open(self._checksum_file, 'r') as checksums_file:
             checksums = checksums_file.readlines()
             for checksum in checksums:
